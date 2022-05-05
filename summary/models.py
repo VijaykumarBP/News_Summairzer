@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from email.quoprimime import body_check
 from importlib.abc import Traversable
 from multiprocessing.reduction import duplicate
