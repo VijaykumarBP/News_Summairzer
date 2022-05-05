@@ -79,12 +79,15 @@ WSGI_APPLICATION = 'news_summarizer.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'mysql.connector.django',
         'NAME': 'summary',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'USER': 'root',
         'PASSWORD': 'May@1505^',
+        'OPTIONS': {
+            'autocommit': True,
+        },
     }
 }
 
