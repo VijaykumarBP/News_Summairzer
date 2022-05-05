@@ -81,10 +81,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'summary',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-        'USER': 'root',
-        'PASSWORD': 'May@1505^',
+        'HOST': 'VijayKumarABP.mysql.pythonanywhere-services.com',
+        'PORT': '',
+        'USER': 'VijayKumarABP',
+        'PASSWORD': 'Vidunvivaan15',
         'OPTIONS': {
             'autocommit': True,
         },
