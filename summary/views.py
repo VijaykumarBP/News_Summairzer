@@ -1,10 +1,8 @@
-from dataclasses import replace
 import uuid
 from django.shortcuts import redirect, render
 from django.http import HttpResponse, HttpResponseRedirect
 import openai
 import gtts
-from requests import delete
 from .models import Prompt, PromptReview, Review
 from .forms import PromptForm, ReviewForm, PromptReviewForm
 from django.utils.datastructures import MultiValueDictKeyError
