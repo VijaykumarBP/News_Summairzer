@@ -84,7 +84,7 @@ DATABASES = {
         'HOST': 'VijayKumarABP.mysql.pythonanywhere-services.com',
         'PORT': '',
         'USER': 'VijayKumarABP',
-        'PASSWORD': 'Vidunvivaan15',
+        'PASSWORD': 'May@1505^',
         'OPTIONS': {
             'autocommit': True,
         },
