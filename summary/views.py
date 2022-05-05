@@ -77,7 +77,7 @@ def summary(request):
                     messages.error(request,"Please upload images in (JPG/PNG/JFIF) formats only")
                 return HttpResponseRedirect('/')
         else:
-            article = newspaper.Article(url=url, language='en')
+            article = newspaper.Article(url=url, language=detect(prompt1))
             article.download()
             article.parse()
 
@@ -97,6 +97,7 @@ def summary(request):
         print(prompt1)
 
         language = detect(prompt1)
+        print('DETECTED', language)
 
         engine = request.POST['engine']
         # language = request.POST['language']
@@ -112,7 +113,7 @@ def summary(request):
                 if  len(prompt1) <= 50 :
                     raise PromptRaiseError
                 else:
-                    openai.api_key = "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"
+                    openai.api_key = "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"
                     response = openai.Completion.create(
                         engine = engine,
                         prompt = prompt,
@@ -136,6 +137,7 @@ def summary(request):
         
         if audiocheck:
             obj = gtts.gTTS(text=summary, lang=language, slow=False)
+            print('DETECTED2', language)
             # text_val_list = summary.split()
             ULR = string.ascii_uppercase
             LLR = string.ascii_lowercase
@@ -150,10 +152,10 @@ def summary(request):
             obj_save = obj.save(text_save+".mp3")
 
             main_file = open(text_save+".mp3", "rb").read()
-            dest_file1 = open("static/audios/"+text_save+".mp3", 'wb+')
+            # dest_file1 = open("static/audios/"+text_save+".mp3", 'wb+')
             dest_file2 = open("media/audios/"+text_save+".mp3", 'wb+')
-            dest_file1.write(main_file)
-            dest_file1.close()
+            # dest_file1.write(main_file)
+            # dest_file1.close()
             dest_file2.write(main_file)
             dest_file2.close()
             os.remove(text_save+".mp3")
