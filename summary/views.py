@@ -64,7 +64,8 @@ def summary(request):
                         prompt1 = ""
                         prompt1 = '\n'.join(fullText)
                     elif file_type in FILE_TYPES_IMG:
-                        pytesseract.pytesseract.tesseract_cmd = 'C:/Users/VI20279003/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
+                        # pytesseract.pytesseract.tesseract_cmd = 'C:/Users/VI20279003/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
+                        pytesseract.pytesseract.tesseract_cmd = 'static/tesseract.exe'                        
                         im = Image.open(myFile)
                         prompt1 = pytesseract.image_to_string(im)
                     elif file_type not in FILE_TYPES and file_type not in FILE_TYPES_IMG and prompt1=="" and url=="":
