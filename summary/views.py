@@ -121,7 +121,7 @@ def summary(request):
                 if  len(prompt1) <= 50 :
                     raise PromptRaiseError
                 else:        
-                    openai.api_key = "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"
+                    openai.api_key = "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"
                     response = openai.Completion.create(
                         engine = engine,
                         prompt = prompt,
