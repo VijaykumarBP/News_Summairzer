@@ -13,13 +13,14 @@ import pdfplumber
 import docx
 from langdetect import detect
 import newspaper
+from newspaper import Config
 import json
 from PIL import Image
 import pytesseract
 
 
 FILE_TYPES = ['pdf','docx']
-FILE_TYPES_IMG = ['jpg','jpeg','jfif','png']
+FILE_TYPES_IMG = ['jpg','jpeg','jfif','png','JPG','JPEG','JFIF','PNG']
 
 # Create your views here.
 def test(request):
@@ -38,62 +39,74 @@ def summary(request):
         file_type = ""
         myFile = ""
         prompt1 = ""
-        if url == "":            
-            if request.FILES:
-                myFile = request.FILES['myFile']
-                file_type = str(myFile).split('.')[-1]
+        print("URL&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",url)
+        try:
+            if url == "":            
+                if request.FILES:
+                    myFile = request.FILES['myFile']
+                    file_type = str(myFile).split('.')[-1]
+                else:
+                    prompt1 = request.POST['prompt']
+
+                try:
+                    if file_type == "pdf":
+                        # pdfFileObj = open(myFile, 'rb')
+                        with pdfplumber.open(myFile) as pdf:
+                            first_page = pdf.pages[0]
+                            print(first_page.extract_text())                              
+                            prompt1 += first_page.extract_text()
+                    elif file_type == "docx":
+                        doc = docx.Document(myFile)
+                        print(len(doc.paragraphs))
+                        fullText = []
+                        for para in doc.paragraphs:
+                            fullText.append(para.text)
+                        prompt1 = ""
+                        prompt1 = '\n'.join(fullText)
+                    elif file_type in FILE_TYPES_IMG:
+                        pytesseract.pytesseract.tesseract_cmd = 'C:/Users/VI20279003/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
+                        im = Image.open(myFile)
+                        prompt1 = pytesseract.image_to_string(im)
+                    elif file_type not in FILE_TYPES and file_type not in FILE_TYPES_IMG and prompt1=="" and url=="":
+                        if len(prompt1) < 1 and len(url) < 1:
+                            messages.error(request,"Please paste URL or upload a file/image or paste an article in the text area")
+                        elif file_type not in FILE_TYPES:
+                            messages.error(request,"Please upload either PDF or DOCX file only")
+                        elif file_type not in FILE_TYPES_IMG:
+                            messages.error(request,"Please upload images in (JPG/PNG/JFIF) formats only")
+                        return HttpResponseRedirect('/')
+                except:
+                    messages.error(request,"The file seems to be invalid, please upload a valid file!!")
+                    return HttpResponseRedirect('/')            
             else:
-                prompt1 = request.POST['prompt']
+                user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
+                config = Config()
+                config.browser_user_agent = user_agent
+                config.request_timeout = 10
 
-            if file_type == "pdf":
-                # pdfFileObj = open(myFile, 'rb')
-                with pdfplumber.open(myFile) as pdf:
-                    first_page = pdf.pages[0]
-                    print(first_page.extract_text())                              
-                    prompt1 += first_page.extract_text()
-            elif file_type == "docx":
-                doc = docx.Document(myFile)
-                print(len(doc.paragraphs))
-                fullText = []
-                for para in doc.paragraphs:
-                    fullText.append(para.text)
-                prompt1 = ""
-                prompt1 = '\n'.join(fullText)
-            elif file_type in FILE_TYPES_IMG:
-                pytesseract.pytesseract.tesseract_cmd = 'C:/Users/VI20279003/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
-                im = Image.open(myFile)
-                prompt1 = pytesseract.image_to_string(im)
-            elif file_type not in FILE_TYPES and file_type not in FILE_TYPES_IMG and prompt1=="" and url=="":
-                if len(prompt1) < 1 and len(url) < 1:
-                    messages.error(request,"Please paste URL or upload a file/image or paste an article in the text area")
-                elif file_type not in FILE_TYPES:
-                    messages.error(request,"Please upload either PDF or DOCX file only")
-                elif file_type not in FILE_TYPES_IMG:
-                    messages.error(request,"Please upload images in (JPG/PNG/JFIF) formats only")
-                return HttpResponseRedirect('/')
-        else:
-            article = newspaper.Article(url=url, language=detect(prompt1))
-            article.download()
-            article.parse()
+                article = newspaper.Article(url=url, config=config)
+                print("AAARTICLEEEEEEEEEE", article)
+                article.download()
+                article.parse()
 
-            article = {
-                "title": str(article.title),
-                "text": str(article.text),
-                "authors": article.authors,
-                "published_date": str(article.publish_date),
-                "top_image": str(article.top_image),
-                "videos": article.movies,
-                "keywords": article.keywords,
-                "summary": str(article.summary)
-            }
-            prompt1 = article["text"]
+                article = {
+                    "title": str(article.title),
+                    "text": str(article.text),
+                    "authors": article.authors,
+                    "published_date": str(article.publish_date),
+                    "top_image": str(article.top_image),
+                    "videos": article.movies,
+                    "keywords": article.keywords,
+                    "summary": str(article.summary)
+                }
+                prompt1 = article["text"]
+                
+        except Exception as e:
+            messages.error(request,e)
+            return HttpResponseRedirect('/')
         
-        
-        print(prompt1)
-
         language = detect(prompt1)
         print('DETECTED', language)
-
         engine = request.POST['engine']
         # language = request.POST['language']
         article_name = request.POST['article_name']
@@ -108,18 +121,18 @@ def summary(request):
                 if  len(prompt1) <= 50 :
                     raise PromptRaiseError
                 else:
-                    # openai.api_key = "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"
-                    # response = openai.Completion.create(
-                    #     engine = engine,
-                    #     prompt = prompt,
-                    #     temperature=0.5,
-                    #     max_tokens=int(myRange),
-                    #     top_p=1,
-                    #     best_of=5,
-                    #     # n=4,
-                    #     frequency_penalty=0,
-                    #     presence_penalty=0,
-                    # )                              
+                    openai.api_key = "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"
+                    response = openai.Completion.create(
+                        engine = engine,
+                        prompt = prompt,
+                        temperature=0.5,
+                        max_tokens=int(myRange),
+                        top_p=1,
+                        best_of=5,
+                        # n=4,
+                        frequency_penalty=0,
+                        presence_penalty=0,
+                    )                              
                     break
             except PromptRaiseError:
                 messages.error(request,"Please enter a valid article to summarize!!")
@@ -127,8 +140,8 @@ def summary(request):
             except Exception as e:
                 messages.info(request,e)
                 return HttpResponseRedirect('/')
-        # summary = response['choices'][0]['text']
-        summary = "Summary text added for testing purpose"
+        summary = response['choices'][0]['text']
+        # summary = "Summary text added for testing purpose"
         
         if audiocheck:
             obj = gtts.gTTS(text=summary, lang=language, slow=False)
