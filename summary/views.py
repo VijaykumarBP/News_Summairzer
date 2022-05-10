@@ -120,19 +120,20 @@ def summary(request):
             try:                
                 if  len(prompt1) <= 50 :
                     raise PromptRaiseError
-                else:        
-                    openai.api_key = "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"
-                    response = openai.Completion.create(
-                        engine = engine,
-                        prompt = prompt,
-                        temperature=0.5,
-                        max_tokens=int(myRange),
-                        top_p=1,
-                        best_of=5,
-                        # n=4,
-                        frequency_penalty=0,
-                        presence_penalty=0,
-                    )                              
+                else:    
+                    pass    
+                    # openai.api_key = "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"
+                    # response = openai.Completion.create(
+                    #     engine = engine,
+                    #     prompt = prompt,
+                    #     temperature=0.5,
+                    #     max_tokens=int(myRange),
+                    #     top_p=1,
+                    #     best_of=5,
+                    #     # n=4,
+                    #     frequency_penalty=0,
+                    #     presence_penalty=0,
+                    # )                              
                     break
             except PromptRaiseError:
                 messages.error(request,"Please enter a valid article to summarize!!")
@@ -140,8 +141,8 @@ def summary(request):
             except Exception as e:
                 messages.info(request,e)
                 return HttpResponseRedirect('/')
-        summary = response['choices'][0]['text']
-        # summary = "Summary text added for testing purpose"
+        # summary = response['choices'][0]['text']
+        summary = "Summary text added for testing purpose"
         
         if audiocheck:
             obj = gtts.gTTS(text=summary, lang=language, slow=False)
